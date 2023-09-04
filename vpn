@@ -1,0 +1,28 @@
+from python_wireguard import Server, ClientConnection, Key
+
+# Generate key pair for both the client and the server
+private, public = Key.key_pair()
+
+# Set up the connection on the server machine
+server = Server("wg-srv", private, "10.0.0.1/24", 12345)
+server.enable()
+
+# Add a client connection
+client_key = Key("ArE5eVIEOPellzFlGK/oOcHCGnB+AAv0Un4C100COmw=")
+client_ip = "10.0.0.2" # The 'local' IP address that the client will be assigned
+conn = ClientConnection(client_key, client_ip)
+server.add_client(conn)
+
+# Set up the connection on a client machine (different from the server machine)
+from python_wireguard import Client, ServerConnection
+
+local_ip = "10.0.0.2/24" # CIDR block received from server
+client = Client('wg-client', private, local_ip)
+
+srv_key = Key("ArE5eVIEOPellzFlGK/oOcHCGnB+AAv0Un4C100COmw=")
+endpoint = "45.134.79.151"
+port = 12345 # The port on which the server has been set up to listen
+server_conn = ServerConnection(srv_key, endpoint)
+
+client.set_server(server_conn)
+client.connect()
